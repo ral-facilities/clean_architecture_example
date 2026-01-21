@@ -1,45 +1,39 @@
-# root/di/accounts.py
+
 from __future__ import annotations
 
-import logging
-from dataclasses import dataclass
+from typing import Annotated
 
-from sqlalchemy.orm import Session
-
-from features.accounts.presenters import AccountCreatorPresenter, AccountGetterPresenter
-from features.accounts.ports import AccountCreatorPort, AccountGetterPort
-from features.accounts.services import AccountCreator, AccountGetter
+from fastapi import Depends
 
 from infra.db.accounts.repo import AccountRepo
+from features.accounts.presenters import AccountCreatorPresenter, AccountGetterPresenter
+from features.accounts.services import AccountCreator, AccountGetter
+from root.di._shared import ContextDep
 
 
-@dataclass(frozen=True, slots=True)
-class AccountsDeps:
-    """
-    Wired dependencies for the accounts feature.
-    """
+def get_account_repo(ctx: ContextDep) -> AccountRepo:
+    return AccountRepo(session=ctx.session)
 
-    account_creator: AccountCreatorPort.In
-    account_getter: AccountGetterPort.In
+AccountRepoDep = Annotated[AccountRepo, Depends(get_account_repo)]
 
 
-def build_accounts_deps(*, session: Session, logger: logging.Logger) -> AccountsDeps:
-    """
-    Build the accounts dependency graph for a given request-scoped Session.
-    """
-    repo = AccountRepo(session=session)
-
-    getter_presenter = AccountGetterPresenter()
-    creator_presenter = AccountCreatorPresenter()
-
-    account_getter = AccountGetter(repo=repo, presenter=getter_presenter, logger=logger)
-    account_creator = AccountCreator(
+def get_account_creator(
+    repo: AccountRepoDep,
+    ctx: ContextDep,
+) -> AccountCreator:
+    return AccountCreator(
         repo=repo,
-        presenter=creator_presenter,
-        logger=logger,
+        presenter=AccountCreatorPresenter(),
+        logger=ctx.logger,
     )
 
-    return AccountsDeps(
-        account_creator=account_creator,
-        account_getter=account_getter,
+
+def get_account_getter(
+    repo: AccountRepoDep,
+    ctx: ContextDep,
+) -> AccountGetter:
+    return AccountGetter(
+        repo=repo,
+        presenter=AccountGetterPresenter(),
+        logger=ctx.logger,
     )

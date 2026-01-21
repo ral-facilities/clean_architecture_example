@@ -4,10 +4,10 @@ from __future__ import annotations
 from fastapi import APIRouter
 
 from features.accounts.ports import AccountCreatorPort, AccountGetterPort
-from features.accounts.schemas import AccountResponse, CreateAccountRequest
+from features.accounts.schemas import AccountResponse, CreateAccountRequest, GetAccountRequest
 
 
-def build_router(
+def build_account_routers(
     *,
     account_creator: AccountCreatorPort.In,
     account_getter: AccountGetterPort.In,
@@ -19,7 +19,7 @@ def build_router(
         return account_creator.execute(initial_balance_pence=req.initial_balance_pence)
 
     @router.get("/{account_id}", response_model=AccountResponse)
-    def get_account_endpoint(account_id: str) -> AccountResponse:
-        return account_getter.execute(account_id=account_id)
+    def get_account_endpoint(req: GetAccountRequest) -> AccountResponse:
+        return account_getter.execute(account_id=req.account_id)
 
     return router

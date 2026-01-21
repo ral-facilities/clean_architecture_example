@@ -7,7 +7,7 @@ from features.transfers.ports import TransferCreatorPort
 from features.transfers.schemas import CreateTransferRequest, TransferResponse
 
 
-def build_router(*, transfer_creator: TransferCreatorPort.In) -> APIRouter:
+def build_transfer_routers(*, transfer_creator: TransferCreatorPort.In) -> APIRouter:
     router = APIRouter(prefix="/transfers", tags=["transfers"])
 
     @router.post("", response_model=TransferResponse)

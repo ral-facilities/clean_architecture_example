@@ -15,6 +15,10 @@ from features.accounts.ports import (
     AccountRepoPort,
 )
 
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from features.accounts.schemas import AccountResponse
+
 
 class AccountGetter(AccountGetterPort.In):
     """
@@ -37,7 +41,7 @@ class AccountGetter(AccountGetterPort.In):
         self._presenter = presenter
         self._logger = logger
 
-    def execute(self, *, account_id: str) -> "AccountResponse":
+    def execute(self, *, account_id: str) -> AccountResponse:
         self._logger.info("account_get_started account_id=%s", account_id)
 
         account = self._repo.get(AccountId(account_id))
@@ -77,7 +81,7 @@ class AccountCreator(AccountCreatorPort.In):
         self._presenter = presenter
         self._logger = logger
 
-    def execute(self, *, initial_balance_pence: int | None) -> "AccountResponse":
+    def execute(self, *, initial_balance_pence: int | None) -> AccountResponse:
         initial = initial_balance_pence if initial_balance_pence is not None else 0
         self._logger.info("account_create_started initial_balance_pence=%s", initial)
 
@@ -105,10 +109,3 @@ class AccountCreator(AccountCreatorPort.In):
 
         # Delegate formatting to the presenter.
         return self._presenter.present(account)
-
-
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    # Import only for typing; avoids runtime coupling / import cycles.
-    from features.accounts.schemas import AccountResponse

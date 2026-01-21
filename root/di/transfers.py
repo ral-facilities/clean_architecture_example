@@ -1,42 +1,31 @@
 # root/di/transfers.py
 from __future__ import annotations
 
-import logging
-from dataclasses import dataclass
+from typing import Annotated
 
-from sqlalchemy.orm import Session
+from fastapi import Depends
 
-from features.transfers.presenters import TransferCreatorPresenter
-from features.transfers.ports import TransferCreatorPort
-from features.transfers.services import TransferCreator
-
-from infra.db.accounts.repo import AccountRepo
 from infra.db.transfers.repo import TransferRepo
+from features.transfers.presenters import TransferCreatorPresenter
+from features.transfers.services import TransferCreator
+from root.di._shared import ContextDep
+from root.di.accounts import AccountRepoDep
 
 
-@dataclass(frozen=True, slots=True)
-class TransfersDeps:
-    """
-    Wired dependencies for the transfers feature.
-    """
+def get_transfer_repo(ctx: ContextDep) -> TransferRepo:
+    return TransferRepo(session=ctx.session)
 
-    transfer_creator: TransferCreatorPort.In
+TransferRepoDep = Annotated[TransferRepo, Depends(get_transfer_repo)]
 
 
-def build_transfers_deps(*, session: Session, logger: logging.Logger) -> TransfersDeps:
-    """
-    Build the transfers dependency graph for a given request-scoped Session.
-    """
-    account_repo = AccountRepo(session=session)
-    transfer_repo = TransferRepo(session=session)
-
-    presenter = TransferCreatorPresenter()
-
-    transfer_creator = TransferCreator(
+def get_transfer_creator(
+    account_repo: AccountRepoDep,
+    transfer_repo: TransferRepoDep,
+    ctx: ContextDep,
+) -> TransferCreator:
+    return TransferCreator(
         account_repo=account_repo,
         transfer_repo=transfer_repo,
-        presenter=presenter,
-        logger=logger,
+        presenter=TransferCreatorPresenter(),
+        logger=ctx.logger,
     )
-
-    return TransfersDeps(transfer_creator=transfer_creator)
