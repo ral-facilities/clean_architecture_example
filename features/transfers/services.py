@@ -20,7 +20,7 @@ from features.transfers.errors import (
     TransferInsufficientFundsError,
     TransferValidationError,
 )
-from features.transfers.ports import TransferCreatorPort, TransferRepo
+from features.transfers.ports import TransferCreatorPort, TransferRepoPort
 
 
 class TransferCreator(TransferCreatorPort.In):
@@ -38,7 +38,7 @@ class TransferCreator(TransferCreatorPort.In):
         self,
         *,
         account_repo: AccountRepoPort,
-        transfer_repo: TransferRepo,
+        transfer_repo: TransferRepoPort,
         presenter: TransferCreatorPort.Out,
         logger: logging.Logger,
     ) -> None:

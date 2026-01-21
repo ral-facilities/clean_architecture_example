@@ -1,4 +1,3 @@
-# features/transfers/ports.py
 """
 END-TO-END FLOW (transfers/post) with "In returns TransferResponse" and
 "Out.present returns TransferResponse".
@@ -8,14 +7,11 @@ Secondary ports (Repo, IdGenerator, Clock) are driven by the use case.
 """
 from __future__ import annotations
 
-from datetime import datetime
 from typing import Protocol, TYPE_CHECKING
 
-from core.values.types import AccountId, TransferId
 from core.values.objects import AppliedTransfer
 
 from features._shared.ports import IOPorts
-from features.accounts.ports import AccountRepoPort
 
 
 class TransferCreatorPort(IOPorts):
@@ -48,7 +44,7 @@ class TransferCreatorPort(IOPorts):
             raise NotImplementedError
 
 
-class TransferRepo(Protocol):
+class TransferRepoPort(Protocol):
     """
     Persistence port for transfers (facts).
     Implemented by infrastructure adapters.

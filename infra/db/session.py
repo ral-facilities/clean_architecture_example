@@ -5,23 +5,36 @@ from collections.abc import Generator
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
-
+from sqlalchemy.pool import StaticPool
 
 class ORMBase(DeclarativeBase):
     """
     SQLAlchemy ORM base for all mapped models.
     """
 
+# In-memory SQLite
+DATABASE_URL = "sqlite+pysqlite:///:memory:"
 
-DATABASE_URL = "sqlite+pysqlite:///./demo.db"
+engine = create_engine(
+    DATABASE_URL,
+    echo=False,
+    future=True,
+    connect_args={"check_same_thread": False},
+    poolclass=StaticPool,  # critical for in-memory DB persistence
+)
 
-engine = create_engine(DATABASE_URL, echo=False, future=True)
-SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False, future=True)
+SessionLocal = sessionmaker(
+    bind=engine,
+    autoflush=False,
+    autocommit=False,
+    future=True,
+)
 
 
 def create_all_db_tables() -> None:
     """
     Create all database tables.
+    Must be called once at startup.
     """
     ORMBase.metadata.create_all(bind=engine)
 
