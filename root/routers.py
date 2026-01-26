@@ -27,6 +27,7 @@ Usage:
 - Called during application startup from the application root.
 - Acts as the central point where all feature routers are assembled.
 """
+
 from __future__ import annotations
 
 from fastapi import FastAPI

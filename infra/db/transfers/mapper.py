@@ -29,12 +29,12 @@ Usage:
 - Never imported by domain or application code.
 - Acts as the translation boundary between persistence and business meaning.
 """
+
 from __future__ import annotations
 
 from core.entities.transfer import Transfer
+from core.values.custom_types import AccountId, TransferId
 from core.values.objects import Money
-from core.values.types import AccountId, TransferId
-
 from infra.db.transfers.model import TransferModel
 
 

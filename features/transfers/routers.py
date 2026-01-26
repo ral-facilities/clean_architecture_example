@@ -32,13 +32,14 @@ Usage:
 - Acts as the outermost adapter between FastAPI and the transfer use case.
 - Never imported by domain or application policy code.
 """
+
 from typing import Annotated
 
 from fastapi import APIRouter, Depends
 
-from features._shared.types import Provider
-from features.transfers.use_cases import TransferCreator
+from features._shared.custom_types import Provider
 from features.transfers.schemas import CreateTransferRequest, TransferResponse
+from features.transfers.use_cases import TransferCreator
 
 
 def build_transfer_routers(

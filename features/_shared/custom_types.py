@@ -5,4 +5,3 @@ from typing import TypeVar
 
 T = TypeVar("T")
 Provider = Callable[..., T]
-

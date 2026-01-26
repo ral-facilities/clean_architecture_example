@@ -28,6 +28,7 @@ Usage:
 - Used by domain entities, value objects, and domain services to express valid states.
 - Used by outer layers for persistence, transport, and presentation without redefining meaning.
 """
+
 from enum import Enum
 
 

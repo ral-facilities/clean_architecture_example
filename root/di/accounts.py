@@ -36,20 +36,22 @@ Usage:
 - Used by delivery layers (routers) through FastAPI dependency injection.
 - Acts as the assembly point for the Accounts feature object graph.
 """
+
 from __future__ import annotations
 
 from typing import Annotated
 
 from fastapi import Depends
 
-from infra.db.accounts.repo import AccountRepo
 from features.accounts.presenters import AccountCreatorPresenter, AccountGetterPresenter
 from features.accounts.use_cases import AccountCreator, AccountGetter
+from infra.db.accounts.repo import AccountRepo
 from root.di._shared import ContextDep
 
 
 def get_account_repo(ctx: ContextDep) -> AccountRepo:
     return AccountRepo(session=ctx.session)
+
 
 AccountRepoDep = Annotated[AccountRepo, Depends(get_account_repo)]
 

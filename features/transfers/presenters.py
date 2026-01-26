@@ -30,10 +30,10 @@ Usage:
 - Used by delivery layers as the final response shape.
 - Acts as the boundary between use case policy and presentation format.
 """
+
 from __future__ import annotations
 
 from core.values.objects import AppliedTransfer
-
 from features.transfers.ports import TransferCreatorPort
 from features.transfers.schemas import TransferResponse
 

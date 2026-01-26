@@ -31,11 +31,13 @@ Usage:
 - Produces pure domain results that outer layers may persist or present.
 - Serves as the canonical definition of cross-entity business behaviour.
 """
+
 from __future__ import annotations
 
 from core.entities.account import Account
 from core.entities.transfer import Transfer
 from core.values.objects import AppliedTransfer
+
 
 def apply_transfer(
     *, from_account: Account, to_account: Account, transfer: Transfer

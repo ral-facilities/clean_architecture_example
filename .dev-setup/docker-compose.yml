@@ -1,0 +1,16 @@
+services:
+  pre-commit:
+    build:
+      context: ..
+      dockerfile: ${DOCKERFILE_PATH}
+    # Set in the pre-commit wrapper locally, unset in CI.
+    image: ${IMAGE_TAG:-dev-setup-pre-commit}
+    working_dir: /app
+    entrypoint: ["/app/.dev-setup/entrypoint.sh", "${DOCKERFILE_PATH}"]
+    volumes:
+      - ..:/app
+      - ${HOME:-~}/.cache/pre-commit:/root/.cache/pre-commit
+      - node_modules:/app/node_modules
+
+volumes:
+  node_modules:

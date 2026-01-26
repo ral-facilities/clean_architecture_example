@@ -29,6 +29,7 @@ Usage:
 - Never imported by domain or application code.
 - Acts as the lowest-level adapter between the database and the system.
 """
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -52,4 +53,6 @@ class TransferModel(ORMBase):
     to_account_id: Mapped[str] = mapped_column(String, nullable=False)
 
     amount_pence: Mapped[int] = mapped_column(Integer, nullable=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False
+    )

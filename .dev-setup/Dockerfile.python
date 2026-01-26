@@ -1,0 +1,44 @@
+# This is a pinned version of `python:3.11-slim-bullseye`.
+FROM python@sha256:9e25f400253a5fa3191813d6a67eb801ca1e6f012b3bd2588fa6920b59e3eba6
+
+WORKDIR /app
+
+# Install:
+# git for pre-commit
+# libatomic1 lib needed for Node (used by some python hooks).
+# build-essential & python3-dev include C build tools that some deps require.
+# util-linux is needed for `script` in entrypoint.sh.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        git=1:2.30.2-1+deb11u2 \
+        libatomic1=10.2.1-6 \
+        build-essential=12.9 \
+        python3-dev=3.9.2-3 \
+        util-linux=2.36.1-8+deb11u2 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy depencencies (must include pre-commit).
+COPY requirements*.txt ./
+
+# Install dependencies.
+# Sometimes packages should be fully ignored or installed system-wide rather than
+# via pip, so to avoid interference, exclude them from requirement files.
+# Unwanted packages syntax example:
+# unwanted_packages="xrootd|package1|package2"
+RUN unwanted_packages="xrootd"; \
+    # Remove unwanted packages from all requirements* (-dev, -testing, etc.) files.
+    for f in requirements*.txt; do \
+        if [ -f "$f" ]; then \
+            grep -viE "^(${unwanted_packages})([[:space:]]|==|$)" "$f" > "${f}.tmp"; \
+            mv "${f}.tmp" "$f"; \
+        fi; \
+    done; \
+    # Install remaining requirements.
+    for f in requirements*.txt; do \
+        if [ -f "$f" ]; then \
+            pip install --no-cache-dir -r "$f"; \
+        fi; \
+    done
+
+# Configure git to consider /app a safe directory (needed for CI).
+RUN git config --global --add safe.directory /app

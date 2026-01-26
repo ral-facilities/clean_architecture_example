@@ -17,14 +17,15 @@ Usage:
 - Created by application use cases when a transfer is authorised/recorded.
 - Persisted by infrastructure as domain data (infrastructure adapts to this shape).
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime
 
+from core.values.custom_types import AccountId, TransferId
 from core.values.errors import InvalidAmountError, SameAccountTransferError
 from core.values.objects import Money
-from core.values.types import AccountId, TransferId
 
 
 @dataclass(frozen=True, slots=True)
@@ -37,7 +38,9 @@ class Transfer:
 
     def __post_init__(self) -> None:
         if self.from_account_id == self.to_account_id:
-            raise SameAccountTransferError("Source and destination accounts must differ")
+            raise SameAccountTransferError(
+                "Source and destination accounts must differ"
+            )
 
         if not self.amount.is_positive():
             raise InvalidAmountError("Transfer amount must be positive")

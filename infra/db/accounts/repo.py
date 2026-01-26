@@ -30,16 +30,15 @@ Usage:
 - Used by application interactors through the AccountRepoPort interface.
 - Serves as the concrete bridge between relational storage and domain entities.
 """
+
 from __future__ import annotations
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from core.entities.account import Account
-from core.values.types import AccountId
-
+from core.values.custom_types import AccountId
 from features.accounts.ports import AccountRepoPort
-
 from infra.db.accounts.mapper import to_entity, to_model
 from infra.db.accounts.model import AccountModel
 

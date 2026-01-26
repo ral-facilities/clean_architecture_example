@@ -33,6 +33,7 @@ Usage:
 - Caught by delivery layers and translated into protocol-specific responses.
 - Used to keep domain errors from leaking directly into external interfaces.
 """
+
 from __future__ import annotations
 
 from features._shared.errors import ApplicationError

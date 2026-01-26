@@ -32,6 +32,7 @@ Usage:
 - Used to serialise transfer results returned to clients.
 - Produced by presenters and returned by use cases.
 """
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -43,6 +44,7 @@ class CreateTransferRequest(BaseModel):
     """
     HTTP request schema for creating a transfer.
     """
+
     from_account_id: str
     to_account_id: str
     amount_pence: int = Field(ge=1)
@@ -52,6 +54,7 @@ class TransferResponse(BaseModel):
     """
     HTTP response schema for returning a transfer result.
     """
+
     id: str
     from_account_id: str
     to_account_id: str

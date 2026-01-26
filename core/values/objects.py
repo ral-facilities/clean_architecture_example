@@ -28,9 +28,12 @@ Usage:
 - Used by domain entities and domain services to express business facts and results.
 - Used by outer layers as immutable domain data without redefining their semantics.
 """
+
 from __future__ import annotations
+
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
+
 from core.values.constants import MIN_TRANSFER_AMOUNT_PENCE
 from core.values.errors import InvalidAmountError
 

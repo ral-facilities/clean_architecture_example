@@ -33,11 +33,11 @@ Usage:
 - Used by delivery layers as the final source of response objects.
 - Acts as the boundary between application policy and presentation format.
 """
+
 from __future__ import annotations
 
 from core.entities.account import Account
-
-from features.accounts.ports import AccountGetterPort, AccountCreatorPort
+from features.accounts.ports import AccountCreatorPort, AccountGetterPort
 from features.accounts.schemas import AccountResponse
 
 

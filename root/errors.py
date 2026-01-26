@@ -35,6 +35,7 @@ Usage:
 - Acts as the single place where exception semantics are bound to HTTP semantics.
 - Ensures a consistent error contract for all API endpoints.
 """
+
 from __future__ import annotations
 
 from fastapi import FastAPI, Request
@@ -82,7 +83,9 @@ def register_exception_handlers(app: FastAPI) -> None:
         return _json_error(404, exc)
 
     @app.exception_handler(AccountValidationError)
-    async def _account_validation(_: Request, exc: AccountValidationError) -> JSONResponse:
+    async def _account_validation(
+        _: Request, exc: AccountValidationError
+    ) -> JSONResponse:
         return _json_error(400, exc)
 
     @app.exception_handler(TransferValidationError)

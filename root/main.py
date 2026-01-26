@@ -1,3 +1,4 @@
+# flake8: noqa: E402
 """
 Ring: Composition Root (not on the Clean Architecture diagram)
 
@@ -32,12 +33,15 @@ Usage:
 - Imported by uvicorn to load the ASGI app.
 - Acts as the composition root that assembles the entire system.
 """
+
+
 from __future__ import annotations
 
-from fastapi import FastAPI
-import uvicorn
 import sys
 from pathlib import Path
+
+import uvicorn
+from fastapi import FastAPI
 
 # Add project root to sys.path for uvicorn.
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -70,6 +74,7 @@ def build_app() -> FastAPI:
     register_routers(app)
 
     return app
+
 
 app = build_app()
 

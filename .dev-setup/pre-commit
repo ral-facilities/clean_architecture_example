@@ -1,0 +1,103 @@
+#!/bin/bash
+set -euo pipefail
+
+#--- Set constants. ---
+
+if ! REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null)"; then
+    echo "Error: you have to be inside a Git repository to run pre-commit." >&2
+    exit 1
+fi
+
+DEV_SETUP_DIR="${REPO_ROOT}/.dev-setup"
+REPO_NAME="$(basename "$REPO_ROOT")"
+
+# --- Verify that the installed wrapper matches this one. ---
+
+SCRIPT_PATH="$DEV_SETUP_DIR/pre-commit"
+SYSTEM_SCRIPT="/usr/local/bin/pre-commit"
+
+if [[ -f "$SYSTEM_SCRIPT" ]] && ! diff -q "$SCRIPT_PATH" "$SYSTEM_SCRIPT" &>/dev/null; then
+    echo
+    echo "WARNING: You're running an outdated version of the pre-commit wrapper." >&2
+    echo "To update it, rerun .dev-setup/pre-commit-install.sh." >&2
+    echo
+fi
+
+# --- Detect repo type (Python vs Node) ---
+
+if find "$REPO_ROOT" -maxdepth 1 -type f \( -name "package.json" -o -name "yarn.lock" -o -name "package-lock.json" \) | grep -q .; then
+    # Uncomment for debugging.
+    # echo "Detected repo type: Node.js"
+    DOCKERFILE="${DEV_SETUP_DIR}/Dockerfile.node"
+else
+    # echo "Detected repo type: Python"
+    DOCKERFILE="${DEV_SETUP_DIR}/Dockerfile.python"
+fi
+
+# --- Export constants for Docker compose. ---
+
+# Force consistent HOME across shell and Git hook.
+export HOME="$(getent passwd "$(id -u)" | cut -d: -f6)"
+export IMAGE_TAG="pre-commit-${REPO_NAME}"
+export DOCKERFILE_PATH="$DOCKERFILE"
+
+#--- Decide whether to rebuild the Docker image based on changes to relevant files. ---
+
+CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/pre-commit-docker"
+mkdir -p "$CACHE_DIR"
+
+SNAPSHOT_FILE="${CACHE_DIR}/$(basename "$REPO_ROOT")-build.snapshot"
+
+# Enable nullglob so that unmatched patterns (e.g. requirements*.txt)
+# expand to nothing instead of a literal string.
+shopt -s nullglob
+
+# Compute snapshot hash from all relevant dependency and Docker files.
+# WARN: Do not quote ${REPO_ROOT}/requirements*.txt, it'll prevent globbing.
+SNAPSHOT_HASH=$(
+  for f in \
+      "${DOCKERFILE}" \
+       ${REPO_ROOT}/requirements*.txt \
+      "${REPO_ROOT}/package-lock.json" \
+      "${REPO_ROOT}/package.json" \
+      "${REPO_ROOT}/yarn.lock"; do
+      if [ -f "$f" ]; then
+          sha256sum "$f" | cut -d ' ' -f1
+      fi
+  done
+)
+
+REBUILD_IMAGE=""
+
+snapshot_file_missing=$([[ ! -f "${SNAPSHOT_FILE}" ]] && echo true || echo false)
+snapshot_file_changed=$(! diff -q <(echo "$SNAPSHOT_HASH") "${SNAPSHOT_FILE}" &>/dev/null && echo true || echo false)
+
+if [[ "$snapshot_file_missing" == true || "$snapshot_file_changed" == true ]]; then
+    if [[ $snapshot_file_missing == true ]]; then
+        echo "No cached Docker image found."
+    else
+        echo "Dockerfile or requirements have changed since the last build."
+    fi
+    echo "Rebuilding the Docker image and running pre-commit hooks..."
+    REBUILD_IMAGE=1
+else
+    echo "Running pre-commit hooks inside a Docker container..."
+fi
+
+#--- Rebuild Docker image if needed. ---
+
+if [[ "$REBUILD_IMAGE" == 1 ]]; then
+    docker compose -p "${REPO_NAME}" -f "${DEV_SETUP_DIR}/docker-compose.yml" build pre-commit
+
+    # Update the snapshot file if the image was built successfully.
+    echo "$SNAPSHOT_HASH" > "${SNAPSHOT_FILE}"
+
+    echo "Docker image built and cached successfully."
+fi
+
+#--- Run pre-commit inside Docker. ---
+
+# The `-p` is needed to prefix named volumes with the project name.
+# Otherwise, multiple projects will share the same named volumes.
+docker compose -p "${REPO_NAME}" -f "${DEV_SETUP_DIR}/docker-compose.yml" run --rm -T \
+    pre-commit "$@" --color always

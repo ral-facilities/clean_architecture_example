@@ -31,6 +31,7 @@ Usage:
 - Acts as a lightweight, expressive alternative to inline assertions or ad-hoc checks.
 """
 
+
 def require(condition: bool, message: str) -> None:
     """
     Minimal assertion helper for domain checks.

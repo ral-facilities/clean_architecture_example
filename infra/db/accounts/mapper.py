@@ -30,12 +30,12 @@ Usage:
 - Never imported by domain or application code.
 - Acts as the translation boundary between persistence and business meaning.
 """
+
 from __future__ import annotations
 
 from core.entities.account import Account
+from core.values.custom_types import AccountId
 from core.values.objects import Money
-from core.values.types import AccountId
-
 from infra.db.accounts.model import AccountModel
 
 

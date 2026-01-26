@@ -29,6 +29,7 @@ Usage:
 - Never imported by domain or application code.
 - Acts as the lowest-level adapter between the database and the system.
 """
+
 from __future__ import annotations
 
 from sqlalchemy import Integer, String

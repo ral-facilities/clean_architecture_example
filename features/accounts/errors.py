@@ -31,6 +31,7 @@ Usage:
 - Caught and translated by delivery layers into protocol-specific errors (e.g. HTTP responses).
 - Serves as the boundary between domain failure and user-visible application failure.
 """
+
 from __future__ import annotations
 
 from features._shared.errors import ApplicationError

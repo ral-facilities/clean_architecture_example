@@ -32,14 +32,15 @@ Usage:
 - Acts as the outermost adapter between the web framework and the use case layer.
 - Never called directly by domain or application code.
 """
- 
+
 from typing import Annotated
 
 from fastapi import APIRouter, Depends
 
-from features._shared.types import Provider
-from features.accounts.use_cases import AccountCreator, AccountGetter
+from features._shared.custom_types import Provider
 from features.accounts.schemas import AccountResponse, CreateAccountRequest
+from features.accounts.use_cases import AccountCreator, AccountGetter
+
 
 def build_account_routers(
     *,

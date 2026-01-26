@@ -1,0 +1,18 @@
+# This is a pinned version of `node:20-alpine3.21`.
+FROM node@sha256:9a45663150c1bdf4bab4a4bbcaa4bd50e5a0624b6de32646cd662135d7bfc735
+
+WORKDIR /app
+
+# Install git, pip, and bash.
+RUN apk add --no-cache \
+      git=2.47.3-r0 \
+      python3=3.12.12-r0 \
+      py3-pip=24.3.1-r0 \
+      bash=5.2.37-r0 \
+      util-linux-misc=2.40.4-r1
+
+# Configure git as safe directory.
+RUN git config --global --add safe.directory /app
+
+# Install pre-commit.
+RUN pip install --no-cache-dir --break-system-packages pre-commit==3.8.0

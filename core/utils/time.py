@@ -31,7 +31,6 @@ Usage:
 - Acts as the system’s single source of truth for “now”.
 """
 
-
 from datetime import datetime, timezone
 
 

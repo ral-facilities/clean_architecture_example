@@ -34,13 +34,14 @@ Usage:
 - Treated by infrastructure as opaque business data to persist or restore.
 - Serves as the single source of truth for what an Account is and how it may change.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass
 
-from core.values.errors import InvalidAmountError, InsufficientFundsError
+from core.values.custom_types import AccountId
+from core.values.errors import InsufficientFundsError, InvalidAmountError
 from core.values.objects import Money
-from core.values.types import AccountId
 
 
 @dataclass(slots=True)

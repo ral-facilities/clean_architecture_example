@@ -33,11 +33,14 @@ Usage:
 - Used by routers and interactors to obtain a configured logger via DI.
 - Acts as the bridge between logging infrastructure and the running application.
 """
+
 from __future__ import annotations
 
 import logging
 from typing import Annotated
+
 from fastapi import Depends, Request
+
 from infra.logging.logger import build_logger
 
 
@@ -55,5 +58,6 @@ def get_logger(request: Request) -> logging.Logger:
     FastAPI dependency for retrieving the shared application logger.
     """
     return request.app.state.logger
+
 
 LoggerDep = Annotated[logging.Logger, Depends(get_logger)]

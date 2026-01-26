@@ -35,12 +35,12 @@ Usage:
 - Implemented by infrastructure adapters for persistence ports.
 - Imported by delivery and infrastructure to wire concrete implementations.
 """
+
 from __future__ import annotations
 
-from typing import Protocol, TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol
 
 from core.values.objects import AppliedTransfer
-
 from features._shared.ports import IOPorts
 
 

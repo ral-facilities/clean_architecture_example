@@ -36,6 +36,7 @@ Usage:
 - Used by delivery frameworks (e.g. FastAPI) to inject a session per request.
 - Acts as the single source of truth for database connectivity and transaction scope.
 """
+
 from __future__ import annotations
 
 from collections.abc import Generator
@@ -44,10 +45,12 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
+
 class ORMBase(DeclarativeBase):
     """
     SQLAlchemy ORM base for all mapped models.
     """
+
 
 # In-memory SQLite
 DATABASE_URL = "sqlite+pysqlite:///:memory:"

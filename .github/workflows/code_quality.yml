@@ -1,0 +1,8 @@
+name: Code Quality
+
+on:
+  pull_request:
+
+jobs:
+  code-quality:
+    uses: ral-facilities/ada-ci-workflows/.github/workflows/reusable_workflow.yml@master

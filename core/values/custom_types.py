@@ -23,6 +23,7 @@ Usage:
 - Used by domain entities to express identity.
 - Used by outer layers as opaque identifiers without redefining their meaning.
 """
+
 from typing import NewType
 
 AccountId = NewType("AccountId", str)

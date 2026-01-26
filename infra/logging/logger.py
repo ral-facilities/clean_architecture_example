@@ -38,6 +38,7 @@ from __future__ import annotations
 import logging
 from logging import Logger
 
+
 def build_logger(*, name: str = "demo", level: int = logging.INFO) -> Logger:
     """
     Build and configure the application logger.
