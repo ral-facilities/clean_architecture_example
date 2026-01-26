@@ -1,9 +1,44 @@
+"""
+Ring: Delivery (Controllers, Frameworks & Drivers / HTTP)
+
+Responsibility:
+Defines the HTTP routing layer for the Accounts feature.
+This module binds FastAPI endpoints to application use cases and adapts HTTP
+requests and responses to and from the application layer.
+
+Design intent:
+This file is pure delivery mechanism. It contains no business logic and no
+application policy. Its only role is to translate protocol-level concepts
+(HTTP routes, request bodies, dependency injection) into calls to use cases.
+
+This module contains:
+- FastAPI route definitions for account creation and retrieval.
+- Dependency wiring between HTTP endpoints and application interactors.
+
+Dependency constraints:
+- Must not import from any other feature!
+- Must not contain domain or application business rules.
+- Must not perform persistence or infrastructure work directly.
+- May depend on the Application layer (use cases, ports, schemas).
+- May depend on shared application contracts in features/_shared.
+- May depend on framework code (FastAPI, dependency injection).
+
+Stability:
+- Highly volatile.
+- Changes when the API surface, routing, or framework configuration changes.
+
+Usage:
+- Loaded by the application root to register HTTP endpoints.
+- Acts as the outermost adapter between the web framework and the use case layer.
+- Never called directly by domain or application code.
+"""
+ 
 from typing import Annotated
 
 from fastapi import APIRouter, Depends
 
 from features._shared.types import Provider
-from features.accounts.services import AccountCreator, AccountGetter
+from features.accounts.use_cases import AccountCreator, AccountGetter
 from features.accounts.schemas import AccountResponse, CreateAccountRequest
 
 def build_account_routers(

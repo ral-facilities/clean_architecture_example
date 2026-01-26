@@ -1,4 +1,38 @@
-# features/transfers/services.py
+"""
+Ring: Application (Use Case / Interactors)
+
+Responsibility:
+Implements the transfer creation use case.
+This interactor coordinates loading required accounts, constructing a transfer
+fact, applying the transfer via domain services, persisting resulting state, and
+presenting the result.
+
+Design intent:
+The interactor owns orchestration and application policy:
+- It coordinates multiple repositories and domain operations.
+- It translates domain errors into transfer-specific application errors.
+- It delegates formatting to a presenter and persistence to repositories.
+
+This module contains:
+- TransferCreator: the interactor implementing TransferCreatorPort.In.
+
+Dependency constraints:
+- Must not import from any other feature!
+- Must not depend on infrastructure implementations or frameworks directly!
+- Must not contain persistence, HTTP, or serialization logic.
+- May depend on the Domain layer (core/).
+- May depend on this feature’s own ports, errors, and schemas.
+- May depend on shared application contracts in features/_shared.
+
+Stability:
+- Less stable than the domain, more stable than infrastructure.
+- Changes when transfer behaviour changes, not when implementation details change.
+
+Usage:
+- Invoked by delivery mechanisms (e.g. HTTP controllers).
+- Loads data via repository ports, applies domain rules, persists results, and
+  delegates output formatting to the presenter.
+"""
 from __future__ import annotations
 
 import logging
@@ -12,7 +46,7 @@ from core.values.errors import (
     InvalidAmountError as DomainInvalidAmountError,
     SameAccountTransferError as DomainSameAccountTransferError,
 )
-from core.values.objects import Money
+from core.values.objects import Money, AppliedTransfer
 from core.values.types import AccountId, TransferId
 from features.accounts.ports import AccountRepoPort
 from features.transfers.errors import (
@@ -21,19 +55,11 @@ from features.transfers.errors import (
     TransferValidationError,
 )
 from features.transfers.ports import TransferCreatorPort, TransferRepoPort
+from features.transfers.schemas import TransferResponse
+from core.entities.account import Account
 
 
 class TransferCreator(TransferCreatorPort.In):
-    """
-    Use case service for creating a transfer.
-
-    Implements TransferCreatorPort.In and coordinates:
-    - repository access (two accounts + transfer)
-    - domain validation (via Transfer/Money invariants and domain services)
-    - persistence (saving updated accounts + transfer fact)
-    - presentation via TransferCreatorPort.Out
-    """
-
     def __init__(
         self,
         *,
@@ -53,7 +79,7 @@ class TransferCreator(TransferCreatorPort.In):
         from_account_id: str,
         to_account_id: str,
         amount_pence: int,
-    ) -> "TransferResponse":
+    ) -> TransferResponse:
         self._logger.info(
             "transfer_create_started from_account_id=%s to_account_id=%s amount_pence=%s",
             from_account_id,
@@ -61,7 +87,35 @@ class TransferCreator(TransferCreatorPort.In):
             amount_pence,
         )
 
-        # Load accounts.
+        from_account, to_account = self._load_accounts(
+            from_account_id=from_account_id,
+            to_account_id=to_account_id,
+        )
+
+        new_transfer = self._create_transfer(
+            from_account=from_account,
+            to_account=to_account,
+            amount_pence=amount_pence,
+        )
+
+        applied_transfer = self._apply_transfer(
+            from_account=from_account,
+            to_account=to_account,
+            transfer=new_transfer,
+        )
+
+        self._persist(applied_transfer)
+
+        self._log_succeeded(applied_transfer)
+
+        return self._presenter.present(applied_transfer)
+
+    def _load_accounts(
+        self,
+        *,
+        from_account_id: str,
+        to_account_id: str,
+    ) -> tuple[Account, Account]:
         from_account = self._account_repo.get(AccountId(from_account_id))
         if from_account is None:
             self._logger.info(
@@ -78,9 +132,17 @@ class TransferCreator(TransferCreatorPort.In):
             )
             raise TransferAccountNotFoundError(f"Account not found: {to_account_id}")
 
-        # Create the Transfer entity (validates IDs and amount).
+        return from_account, to_account
+
+    def _create_transfer(
+        self,
+        *,
+        from_account: Account,
+        to_account: Account,
+        amount_pence: int,
+    ) -> Transfer:
         try:
-            transfer = Transfer(
+            return Transfer(
                 id=TransferId(new_id()),
                 from_account_id=from_account.id,
                 to_account_id=to_account.id,
@@ -90,17 +152,22 @@ class TransferCreator(TransferCreatorPort.In):
         except (DomainInvalidAmountError, DomainSameAccountTransferError) as exc:
             self._logger.info(
                 "transfer_create_failed_validation from_account_id=%s to_account_id=%s amount_pence=%s error=%s",
-                from_account_id,
-                to_account_id,
+                str(from_account.id),
+                str(to_account.id),
                 amount_pence,
                 str(exc),
             )
-            # Translate domain validation errors into application-level errors.
             raise TransferValidationError(str(exc)) from exc
 
-        # Apply the transfer to the accounts (domain service).
+    def _apply_transfer(
+        self,
+        *,
+        from_account: Account,
+        to_account: Account,
+        transfer: Transfer,
+    ) -> AppliedTransfer:
         try:
-            applied = apply_transfer(
+            return apply_transfer(
                 from_account=from_account,
                 to_account=to_account,
                 transfer=transfer,
@@ -108,19 +175,18 @@ class TransferCreator(TransferCreatorPort.In):
         except DomainInsufficientFundsError as exc:
             self._logger.info(
                 "transfer_create_failed_insufficient_funds from_account_id=%s amount_pence=%s error=%s",
-                from_account_id,
-                amount_pence,
+                str(from_account.id),
+                transfer.amount.pence,
                 str(exc),
             )
             raise TransferInsufficientFundsError(str(exc)) from exc
 
-        # Persist updated account states.
+    def _persist(self, applied: AppliedTransfer) -> None:
         self._account_repo.save(applied.updated_from_account)
         self._account_repo.save(applied.updated_to_account)
-
-        # Persist the transfer fact.
         self._transfer_repo.save(applied.transfer)
 
+    def _log_succeeded(self, applied: AppliedTransfer) -> None:
         self._logger.info(
             "transfer_create_succeeded transfer_id=%s from_account_id=%s to_account_id=%s amount_pence=%s from_balance_pence=%s to_balance_pence=%s",
             str(applied.transfer.id),
@@ -130,13 +196,3 @@ class TransferCreator(TransferCreatorPort.In):
             applied.updated_from_account.balance.pence,
             applied.updated_to_account.balance.pence,
         )
-
-        # Delegate formatting to the presenter.
-        return self._presenter.present(applied)
-
-
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    # Import only for typing; avoids runtime coupling / import cycles.
-    from features.transfers.schemas import TransferResponse

@@ -1,9 +1,39 @@
 """
-END-TO-END FLOW (transfers/post) with "In returns TransferResponse" and
-"Out.present returns TransferResponse".
+Ring: Application (Use Case Boundaries / Ports)
 
-Primary ports (In/Out) are use-case boundaries.
-Secondary ports (Repo, IdGenerator, Clock) are driven by the use case.
+Responsibility:
+Defines the port interfaces for the Transfers feature.
+These ports form the stable contracts that isolate transfer use case logic from
+outer details such as persistence and presentation formatting.
+
+Design intent:
+- Primary ports (In/Out) define the use case boundary: what the application offers
+  and what output it emits.
+- Secondary ports (repositories) define what the use case needs from external
+  systems, without importing those systems.
+- Dependencies point inwards: interactors implement In, presenters implement Out,
+  infrastructure implements repository ports.
+
+This module contains:
+- TransferCreatorPort: primary In/Out ports for creating a transfer.
+- TransferRepoPort: secondary persistence port for saving transfer facts.
+
+Dependency constraints:
+- Must not import from any other feature!
+- Must not depend on infrastructure implementations or frameworks directly!
+- Must not contain persistence, HTTP, or serialization logic.
+- May depend on the Domain layer (core/).
+- May depend on this feature’s own ports, errors, and schemas.
+- May depend on shared application contracts in features/_shared.
+
+Stability:
+- Highly stable.
+- Ports are the contracts that outer layers adapt to; they should change rarely.
+
+Usage:
+- Implemented by transfer interactors (In) and presenters (Out).
+- Implemented by infrastructure adapters for persistence ports.
+- Imported by delivery and infrastructure to wire concrete implementations.
 """
 from __future__ import annotations
 

@@ -1,25 +1,33 @@
 """
-Domain value objects.
+Ring: Domain (Shared Kernel / Value Objects)
 
-These are objects that have:
-- no identity
-- no lifecycle
-- no persistence of their own
-- equality defined purely by their value
+Responsibility:
+Defines domain value objects: objects that are defined purely by their value and not
+by identity, lifecycle, or persistence. They represent facts, measurements, or results
+within the domain.
 
-They differ from entities in that entities are tracked by identity
-(AccountId, TransferId) and represent things that exist over time.
+Design intent:
+- Value objects have no identity and no independent existence over time.
+- Equality is defined only by their contained values.
+- They differ from entities, which are tracked by identity and represent things that
+  persist and evolve in the system.
 
-A value object represents a fact, a measurement, or a result.
+This module contains:
+- Money: a measurement of monetary value in minor units.
+- AppliedTransfer: the result of a domain operation, not a persistent business object.
 
-For example:
-- Money is not an entity because £10 is not a “thing” in the system.
-  There is no MoneyId, no Money repository, no lifecycle.
-  £10 is simply a value. Any £10 is interchangeable with any other £10.
-- AppliedTransfer is not an entity because it does not represent a persistent
-  business object. It represents the outcome of a domain operation.
+Dependency constraints:
+- Must only depend on other domain modules and the Python standard library.
+- Must never import from application (features/), infrastructure (infra/), or delivery (root/).
+
+Stability:
+- Highly stable.
+- Changes here redefine the meaning of fundamental domain values.
+
+Usage:
+- Used by domain entities and domain services to express business facts and results.
+- Used by outer layers as immutable domain data without redefining their semantics.
 """
-
 from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING

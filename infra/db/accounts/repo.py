@@ -1,4 +1,35 @@
-# infra/db/accounts/repo.py
+"""
+Ring: Infrastructure (Persistence / Repositories)
+
+Responsibility:
+Implements the Account repository using SQLAlchemy.
+This module provides a concrete persistence adapter for the AccountRepoPort defined
+by the application layer.
+
+Design intent:
+This is an infrastructure implementation of an application-facing port.
+It adapts the database and ORM to the needs of the application, never the reverse.
+All SQLAlchemy and session mechanics are contained here so that application and
+domain layers remain persistence-agnostic.
+
+This module contains:
+- AccountRepo: a SQLAlchemy-backed implementation of AccountRepoPort.
+
+Dependency constraints:
+- Must not be imported application use case code directly (pass down through DI instead).
+- Must depend on application ports (features/accounts/ports) to implement them.
+- May depend on the Domain layer (core/) for entities and value types.
+- May depend on infrastructure tooling (SQLAlchemy, sessions, ORM models).
+
+Stability:
+- Highly volatile.
+- Changes when persistence technology, schema, or ORM usage changes.
+
+Usage:
+- Instantiated and wired in the infrastructure or root layer.
+- Used by application interactors through the AccountRepoPort interface.
+- Serves as the concrete bridge between relational storage and domain entities.
+"""
 from __future__ import annotations
 
 from sqlalchemy import select
