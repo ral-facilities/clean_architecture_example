@@ -1,4 +1,5 @@
 """
+TODO: mention why it collapses interface adapters and frameworks layer.
 Ring: Delivery (Controllers, Frameworks & Drivers / HTTP)
 
 Responsibility:
@@ -32,31 +33,37 @@ Usage:
 - Acts as the outermost adapter between FastAPI and the transfer use case.
 - Never imported by domain or application policy code.
 """
-
 from typing import Annotated
 
 from fastapi import APIRouter, Depends
 
 from features._shared.custom_types import Provider
-from features.transfers.schemas import CreateTransferRequest, TransferResponse
-from features.transfers.use_cases import TransferCreator
-
+from features.transfers.adapters.schemas import CreateTransferRequest, TransferResponse
+from features.transfers.use_cases.ports import TransferCreatorPort
+from features.transfers.use_cases.models import CreateTransferInput
+from features.transfers.adapters.presenters import TransferCreatorPresenter
 
 def build_transfer_routers(
     *,
-    transfer_creator: Provider[TransferCreator],
+    transfer_creator: Provider[TransferCreatorPort.In],
+    transfer_presenter: Provider[TransferCreatorPort.Out],
 ) -> APIRouter:
     router = APIRouter(prefix="/transfers", tags=["transfers"])
 
     @router.post("", response_model=TransferResponse)
     def create_transfer_endpoint(
-        req: CreateTransferRequest,
-        creator: Annotated[TransferCreator, Depends(transfer_creator)],
+        request: CreateTransferRequest,
+        creator: Annotated[TransferCreatorPort.In, Depends(transfer_creator)],
+        presenter: Annotated[TransferCreatorPresenter, Depends(transfer_presenter)],
     ) -> TransferResponse:
-        return creator.execute(
-            from_account_id=req.from_account_id,
-            to_account_id=req.to_account_id,
-            amount_pence=req.amount_pence,
+        creator.execute(
+            transfer_input=CreateTransferInput(
+                from_account_id=request.from_account_id,
+                to_account_id=request.to_account_id,
+                amount_pence=request.amount_pence,
+            ),
+            presenter=presenter,
         )
+        return presenter.response
 
     return router

@@ -36,7 +36,7 @@ from __future__ import annotations
 from sqlalchemy.orm import Session
 
 from core.entities.transfer import Transfer
-from features.transfers.ports import TransferRepoPort
+from features.transfers.use_cases.ports import TransferRepoPort
 from infra.db.transfers.mapper import to_model
 
 

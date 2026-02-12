@@ -43,8 +43,9 @@ from typing import Annotated
 
 from fastapi import Depends
 
-from features.transfers.presenters import TransferCreatorPresenter
-from features.transfers.use_cases import TransferCreator
+from features.transfers.adapters.presenters import TransferCreatorPresenter
+from features.transfers.use_cases.interactors import TransferCreator
+from features.transfers.use_cases.ports import TransferCreatorPort
 from infra.db.transfers.repo import TransferRepo
 from root.di._shared import ContextDep
 from root.di.accounts import AccountRepoDep
@@ -57,6 +58,15 @@ def get_transfer_repo(ctx: ContextDep) -> TransferRepo:
 TransferRepoDep = Annotated[TransferRepo, Depends(get_transfer_repo)]
 
 
+def get_transfer_presenter() -> TransferCreatorPort.Out:
+    return TransferCreatorPresenter()
+
+
+TransferPresenterDep = Annotated[
+    TransferCreatorPort.Out, Depends(get_transfer_presenter)
+]
+
+
 def get_transfer_creator(
     account_repo: AccountRepoDep,
     transfer_repo: TransferRepoDep,
@@ -65,6 +75,5 @@ def get_transfer_creator(
     return TransferCreator(
         account_repo=account_repo,
         transfer_repo=transfer_repo,
-        presenter=TransferCreatorPresenter(),
         logger=ctx.logger,
     )

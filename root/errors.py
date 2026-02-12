@@ -43,8 +43,11 @@ from fastapi.responses import JSONResponse
 
 from core.values.errors import DomainError
 from features._shared.errors import ApplicationError
-from features.accounts.errors import AccountNotFoundError, AccountValidationError
-from features.transfers.errors import (
+from features.accounts.use_cases.errors import (
+    AccountNotFoundError,
+    AccountValidationError,
+)
+from features.transfers.use_cases.errors import (
     TransferAccountNotFoundError,
     TransferInsufficientFundsError,
     TransferValidationError,

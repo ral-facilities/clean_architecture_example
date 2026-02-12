@@ -50,12 +50,12 @@ class Account:
     balance: Money
 
     def __post_init__(self) -> None:
-        if not self.balance.is_positive():
-            raise InvalidAmountError("Account balance must be positive")
+        if not self.balance.is_non_negative():
+            raise InvalidAmountError("Account balance must be non-negative")
 
     def credit(self, amount: Money) -> Account:
-        if not amount.is_positive():
-            raise InvalidAmountError("Credit amount must be positive")
+        if not amount.is_non_negative():
+            raise InvalidAmountError("Creadit amount must be non-negative")
 
         return Account(
             id=self.id,
@@ -63,8 +63,8 @@ class Account:
         )
 
     def debit(self, amount: Money) -> Account:
-        if not amount.is_positive():
-            raise InvalidAmountError("Debit amount must be positive")
+        if not amount.is_non_negative():
+            raise InvalidAmountError("Debit amount must be non-negative")
 
         if self.balance.pence < amount.pence:
             raise InsufficientFundsError("Insufficient funds")

@@ -28,5 +28,5 @@ Usage:
 - Serves as the single source of truth for currency identity and absolute financial limits.
 """
 
-MIN_TRANSFER_AMOUNT_PENCE = 1
+MIN_ACCOUNT_BALANCE_PENCE = 0
 CURRENCY = "GBP"

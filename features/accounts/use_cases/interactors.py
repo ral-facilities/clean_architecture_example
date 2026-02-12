@@ -1,8 +1,10 @@
+# features/accounts/use_cases/use_cases.py
 """
 Ring: Application (Use Case / Interactors)
 
 Responsibility:
 Implements the account-related use cases of the system.
+
 These interactors coordinate domain objects, repositories, presenters, and logging
 to realise application behaviour such as fetching and creating accounts.
 
@@ -16,7 +18,7 @@ Dependency constraints:
 - Must not depend on infrastructure implementations or frameworks directly.
 - Must not contain persistence, HTTP, or serialization logic.
 - May depend on the Domain layer (core/).
-- May depend on this feature’s own ports, errors, and schemas.
+- May depend on this feature's own ports, errors, and schemas.
 - May depend on shared application contracts in features/_shared.
 
 Stability:
@@ -32,22 +34,19 @@ Usage:
 from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING
 
 from core.entities.account import Account
 from core.utils.id import new_id
 from core.values.custom_types import AccountId
 from core.values.errors import InvalidAmountError as DomainInvalidAmountError
 from core.values.objects import Money
-from features.accounts.errors import AccountNotFoundError, AccountValidationError
-from features.accounts.ports import (
+from features.accounts.use_cases.errors import AccountNotFoundError, AccountValidationError
+from features.accounts.use_cases.models import CreateAccountInput, GetAccountInput
+from features.accounts.use_cases.ports import (
     AccountCreatorPort,
     AccountGetterPort,
-    AccountRepoPort,
 )
-
-if TYPE_CHECKING:
-    from features.accounts.schemas import AccountResponse
+from features._shared.accounts.ports import AccountRepoPort
 
 
 class AccountGetter(AccountGetterPort.In):
@@ -55,21 +54,23 @@ class AccountGetter(AccountGetterPort.In):
         self,
         *,
         repo: AccountRepoPort,
-        presenter: AccountGetterPort.Out,
         logger: logging.Logger,
     ) -> None:
         self._repo = repo
-        self._presenter = presenter
         self._logger = logger
 
-    def execute(self, *, account_id: str) -> AccountResponse:
-        self._logger.info("account_get_started account_id=%s", account_id)
+    def execute(
+        self,
+        *,
+        account_input: GetAccountInput,
+        presenter: AccountGetterPort.Out,
+    ) -> None:
+        self._logger.info("account_get_started account_id=%s", account_input.account_id)
 
-        account = self._load_account_or_raise(account_id=account_id)
-
+        account = self._load_account_or_raise(account_id=account_input.account_id)
         self._log_succeeded(account)
 
-        return self._presenter.present(account)
+        presenter.present(account)
 
     def _load_account_or_raise(self, *, account_id: str) -> Account:
         account = self._repo.get(AccountId(account_id))
@@ -92,26 +93,33 @@ class AccountCreator(AccountCreatorPort.In):
         self,
         *,
         repo: AccountRepoPort,
-        presenter: AccountCreatorPort.Out,
         logger: logging.Logger,
     ) -> None:
         self._repo = repo
-        self._presenter = presenter
         self._logger = logger
 
-    def execute(self, *, initial_balance_pence: int | None) -> AccountResponse:
-        initial = initial_balance_pence if (initial_balance_pence is not None) else 0
+    def execute(
+        self,
+        *,
+        account_input: CreateAccountInput,
+        presenter: AccountCreatorPort.Out,
+    ) -> None:
+        initial_balance_pence = (
+            account_input.initial_balance_pence
+            if (account_input.initial_balance_pence is not None)
+            else 0
+        )
         self._logger.info(
             "account_create_started initial_balance_pence=%s", initial_balance_pence
         )
 
-        account = self._create_domain_account_or_raise(initial_balance_pence=initial)
-
+        account = self._create_domain_account_or_raise(
+            initial_balance_pence=initial_balance_pence
+        )
         self._repo.save(account)
-
         self._log_succeeded(account)
 
-        return self._presenter.present(account)
+        presenter.present(account)
 
     def _create_domain_account_or_raise(self, *, initial_balance_pence: int) -> Account:
         try:

@@ -42,6 +42,7 @@ from typing import TYPE_CHECKING, Protocol
 
 from core.values.objects import AppliedTransfer
 from features._shared.ports import IOPorts
+from features.transfers.use_cases.models import CreateTransferInput
 
 
 class TransferCreatorPort(IOPorts):
@@ -58,10 +59,9 @@ class TransferCreatorPort(IOPorts):
         def execute(
             self,
             *,
-            from_account_id: str,
-            to_account_id: str,
-            amount_pence: int,
-        ) -> "TransferResponse":
+            transfer_input: CreateTransferInput,
+            presenter: TransferCreatorPort.Out,
+        ) -> None:
             raise NotImplementedError
 
     class Out(Protocol):
@@ -70,7 +70,7 @@ class TransferCreatorPort(IOPorts):
         The presenter implements this.
         """
 
-        def present(self, applied: AppliedTransfer) -> "TransferResponse":
+        def present(self, applied: AppliedTransfer) -> None:
             raise NotImplementedError
 
 
@@ -80,11 +80,10 @@ class TransferRepoPort(Protocol):
     Implemented by infrastructure adapters.
     """
 
-    def save(self, transfer: "Transfer") -> None:
+    def save(self, transfer: Transfer) -> None:
         raise NotImplementedError
 
 
 if TYPE_CHECKING:
     # Import only for typing; avoids runtime coupling / import cycles.
     from core.entities.transfer import Transfer
-    from features.transfers.schemas import TransferResponse

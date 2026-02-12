@@ -34,7 +34,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from core.values.constants import MIN_TRANSFER_AMOUNT_PENCE
+from core.values.constants import MIN_ACCOUNT_BALANCE_PENCE
 from core.values.errors import InvalidAmountError
 
 if TYPE_CHECKING:
@@ -54,8 +54,8 @@ class Money:
         if self.pence < 0:
             raise InvalidAmountError("Money cannot be negative")
 
-    def is_positive(self) -> bool:
-        return self.pence >= MIN_TRANSFER_AMOUNT_PENCE
+    def is_non_negative(self) -> bool:
+        return self.pence >= MIN_ACCOUNT_BALANCE_PENCE
 
 
 @dataclass(frozen=True, slots=True)
@@ -64,6 +64,6 @@ class AppliedTransfer:
     Domain value object representing the result of applying a transfer.
     """
 
-    updated_from_account: "Account"
-    updated_to_account: "Account"
-    transfer: "Transfer"
+    updated_from_account: Account
+    updated_to_account: Account
+    transfer: Transfer

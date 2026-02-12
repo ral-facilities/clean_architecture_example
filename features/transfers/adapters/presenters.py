@@ -30,23 +30,25 @@ Usage:
 - Used by delivery layers as the final response shape.
 - Acts as the boundary between use case policy and presentation format.
 """
-
 from __future__ import annotations
 
 from core.values.objects import AppliedTransfer
-from features.transfers.ports import TransferCreatorPort
-from features.transfers.schemas import TransferResponse
-
+from features.transfers.use_cases.ports import TransferCreatorPort
+from features.transfers.adapters.schemas import TransferResponse
 
 class TransferCreatorPresenter(TransferCreatorPort.Out):
     """
     Presenter for the transfer use case.
 
-    Converts an AppliedTransfer (domain result) into a TransferResponse DTO.
+    Converts an AppliedTransfer (domain result) into a TransferResponse DTO,
+    storing it as state for the delivery layer to read.
     """
 
-    def present(self, applied: AppliedTransfer) -> TransferResponse:
-        return TransferResponse(
+    def __init__(self) -> None:
+        self.response: TransferResponse
+
+    def present(self, applied: AppliedTransfer) -> None:
+        self.response = TransferResponse(
             id=str(applied.transfer.id),
             from_account_id=str(applied.transfer.from_account_id),
             to_account_id=str(applied.transfer.to_account_id),

@@ -38,7 +38,7 @@ from sqlalchemy.orm import Session
 
 from core.entities.account import Account
 from core.values.custom_types import AccountId
-from features.accounts.ports import AccountRepoPort
+from features._shared.accounts.ports import AccountRepoPort
 from infra.db.accounts.mapper import to_entity, to_model
 from infra.db.accounts.model import AccountModel
 

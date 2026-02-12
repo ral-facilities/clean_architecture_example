@@ -32,8 +32,13 @@ from __future__ import annotations
 
 from fastapi import FastAPI
 
-from features.accounts.routers import build_account_routers
-from features.transfers.routers import build_transfer_routers
+from features.accounts.adapters.controllers import build_account_routers
+from features.accounts.adapters.presenters import (
+    AccountCreatorPresenter,
+    AccountGetterPresenter,
+)
+from features.transfers.adapters.controllers import build_transfer_routers
+from features.transfers.adapters.presenters import TransferCreatorPresenter
 from root.di.accounts import get_account_creator, get_account_getter
 from root.di.transfers import get_transfer_creator
 
@@ -42,12 +47,15 @@ def register_routers(app: FastAPI) -> None:
     app.include_router(
         build_account_routers(
             account_creator=get_account_creator,
+            account_creator_presenter=AccountCreatorPresenter,
             account_getter=get_account_getter,
+            account_getter_presenter=AccountGetterPresenter,
         )
     )
 
     app.include_router(
         build_transfer_routers(
             transfer_creator=get_transfer_creator,
+            transfer_presenter=TransferCreatorPresenter,
         )
     )

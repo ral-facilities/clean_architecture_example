@@ -1,3 +1,4 @@
+# features/accounts/use_cases/errors.py
 """
 Ring: Application (Use Case / Feature Errors)
 
@@ -24,7 +25,7 @@ Dependency constraints:
 
 Stability:
 - Highly stable.
-- Part of the feature’s public error contract.
+- Part of the feature's public error contract.
 
 Usage:
 - Raised by use case interactors.

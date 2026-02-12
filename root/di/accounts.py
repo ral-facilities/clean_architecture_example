@@ -43,8 +43,7 @@ from typing import Annotated
 
 from fastapi import Depends
 
-from features.accounts.presenters import AccountCreatorPresenter, AccountGetterPresenter
-from features.accounts.use_cases import AccountCreator, AccountGetter
+from features.accounts.use_cases.interactors import AccountCreator, AccountGetter
 from infra.db.accounts.repo import AccountRepo
 from root.di._shared import ContextDep
 
@@ -62,7 +61,6 @@ def get_account_creator(
 ) -> AccountCreator:
     return AccountCreator(
         repo=repo,
-        presenter=AccountCreatorPresenter(),
         logger=ctx.logger,
     )
 
@@ -73,6 +71,5 @@ def get_account_getter(
 ) -> AccountGetter:
     return AccountGetter(
         repo=repo,
-        presenter=AccountGetterPresenter(),
         logger=ctx.logger,
     )

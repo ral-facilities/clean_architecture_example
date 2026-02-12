@@ -1,3 +1,4 @@
+# features/accounts/use_cases/ports.py
 """
 Ring: Application (Use Case Boundaries / Ports)
 
@@ -15,15 +16,16 @@ Design intent:
   infrastructure implements repository ports.
 
 This module contains:
-- Primary ports for account retrieval and creation (In/Out).
-- A secondary persistence port for account storage (repository).
+- AccountGetterPort: primary In/Out ports for fetching an account.
+- AccountCreatorPort: primary In/Out ports for creating an account.
+- AccountRepoPort: secondary persistence port for storing and retrieving accounts.
 
 Dependency constraints:
 - Must not import from any other feature!
 - Must not depend on infrastructure implementations or frameworks directly!
 - Must not contain persistence, HTTP, or serialization logic.
 - May depend on the Domain layer (core/).
-- May depend on this feature’s own errors and ports.
+- May depend on this feature’s own ports, errors, and schemas.
 - May depend on shared application contracts in features/_shared.
 
 Stability:
@@ -33,15 +35,16 @@ Stability:
 Usage:
 - Implemented by interactors (In) and presenters (Out) within the feature.
 - Implemented by infrastructure adapters for persistence ports.
+- Imported by delivery and infrastructure to wire concrete implementations.
 """
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol
+from typing import Protocol
 
 from core.entities.account import Account
-from core.values.custom_types import AccountId
 from features._shared.ports import IOPorts
+from features.accounts.use_cases.models import CreateAccountInput, GetAccountInput
 
 
 class AccountGetterPort(IOPorts):
@@ -55,7 +58,12 @@ class AccountGetterPort(IOPorts):
         The interactor implements this.
         """
 
-        def execute(self, *, account_id: str) -> "AccountResponse":
+        def execute(
+            self,
+            *,
+            account_input: GetAccountInput,
+            presenter: AccountGetterPort.Out,
+        ) -> None:
             raise NotImplementedError
 
     class Out(Protocol):
@@ -64,7 +72,7 @@ class AccountGetterPort(IOPorts):
         The presenter implements this.
         """
 
-        def present(self, account: Account) -> "AccountResponse":
+        def present(self, account: Account) -> None:
             raise NotImplementedError
 
 
@@ -76,33 +84,22 @@ class AccountCreatorPort(IOPorts):
     class In(Protocol):
         """
         Input boundary for creating an account.
+        The interactor implements this.
         """
 
-        def execute(self, *, initial_balance_pence: int | None) -> "AccountResponse":
+        def execute(
+            self,
+            *,
+            account_input: CreateAccountInput,
+            presenter: AccountCreatorPort.Out,
+        ) -> None:
             raise NotImplementedError
 
     class Out(Protocol):
         """
         Output boundary for presenting a newly created account.
+        The presenter implements this.
         """
 
-        def present(self, account: Account) -> "AccountResponse":
+        def present(self, account: Account) -> None:
             raise NotImplementedError
-
-
-class AccountRepoPort(Protocol):
-    """
-    Persistence port for accounts.
-    Implemented by infrastructure adapters.
-    """
-
-    def get(self, account_id: AccountId) -> Account | None:
-        raise NotImplementedError
-
-    def save(self, account: Account) -> None:
-        raise NotImplementedError
-
-
-if TYPE_CHECKING:
-    # Import only for typing; avoids runtime coupling / import cycles.
-    from features.accounts.schemas import AccountResponse

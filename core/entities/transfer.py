@@ -42,5 +42,5 @@ class Transfer:
                 "Source and destination accounts must differ"
             )
 
-        if not self.amount.is_positive():
-            raise InvalidAmountError("Transfer amount must be positive")
+        if not self.amount.is_non_negative():
+            raise InvalidAmountError("Transfer amount must be non-negative")
