@@ -38,8 +38,9 @@ Usage:
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Protocol
+from typing import Protocol
 
+from core.entities.transfer import Transfer
 from core.values.objects import AppliedTransfer
 from features._shared.ports import IOPorts
 from features.transfers.use_cases.models import CreateTransferInput
@@ -82,8 +83,3 @@ class TransferRepoPort(Protocol):
 
     def save(self, transfer: Transfer) -> None:
         raise NotImplementedError
-
-
-if TYPE_CHECKING:
-    # Import only for typing; avoids runtime coupling / import cycles.
-    from core.entities.transfer import Transfer

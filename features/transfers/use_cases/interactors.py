@@ -109,7 +109,6 @@ class TransferCreator(TransferCreatorPort.In):
         to_account_id: str,
     ) -> tuple[Account, Account]:
         from_account = self._account_repo.get(AccountId(from_account_id))
-
         if from_account is None:
             self._logger.info(
                 "transfer_create_failed_missing_account account_id=%s role=from",
