@@ -1,4 +1,3 @@
-# features/accounts/use_cases/use_cases.py
 """
 Ring: Application (Use Case / Interactors)
 

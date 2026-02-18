@@ -18,7 +18,7 @@ Dependency constraints:
 - Must not depend on infrastructure implementations or frameworks directly!
 - Must not contain domain or application business rules.
 - May depend on the Domain layer (core/).
-- May depend on this feature’s own ports and schemas.
+- May depend on this feature's own ports and schemas.
 - May depend on shared application contracts in features/_shared.
 
 Stability:
@@ -48,6 +48,7 @@ class TransferCreatorPresenter(TransferCreatorPort.Out):
         self.response: TransferResponse
 
     def present(self, applied: AppliedTransfer) -> None:
+
         self.response = TransferResponse(
             id=str(applied.transfer.id),
             from_account_id=str(applied.transfer.from_account_id),

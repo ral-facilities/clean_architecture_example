@@ -28,7 +28,7 @@ Stability:
 Usage:
 - Used by core, application, and infrastructure layers wherever the current time
  is required.
-- Acts as the system’s single source of truth for “now”.
+- Acts as the system's single source of truth for “now”.
 """
 
 from datetime import datetime, timezone

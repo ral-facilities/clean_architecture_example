@@ -1,4 +1,3 @@
-# features/accounts/use_cases/ports.py
 """
 Ring: Application (Use Case Boundaries / Ports)
 
@@ -18,14 +17,13 @@ Design intent:
 This module contains:
 - AccountGetterPort: primary In/Out ports for fetching an account.
 - AccountCreatorPort: primary In/Out ports for creating an account.
-- AccountRepoPort: secondary persistence port for storing and retrieving accounts.
 
 Dependency constraints:
 - Must not import from any other feature!
 - Must not depend on infrastructure implementations or frameworks directly!
 - Must not contain persistence, HTTP, or serialization logic.
 - May depend on the Domain layer (core/).
-- May depend on this feature’s own ports, errors, and schemas.
+- May depend on this feature's own ports, errors, and schemas.
 - May depend on shared application contracts in features/_shared.
 
 Stability:

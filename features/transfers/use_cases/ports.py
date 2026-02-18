@@ -23,7 +23,7 @@ Dependency constraints:
 - Must not depend on infrastructure implementations or frameworks directly!
 - Must not contain persistence, HTTP, or serialization logic.
 - May depend on the Domain layer (core/).
-- May depend on this feature’s own ports, errors, and schemas.
+- May depend on this feature's own ports, errors, and schemas.
 - May depend on shared application contracts in features/_shared.
 
 Stability:

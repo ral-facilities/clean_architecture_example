@@ -1,5 +1,4 @@
 """
-TODO: mention why it collapses interface adapters and frameworks layer.
 Ring: Delivery (Controllers, Frameworks & Drivers / HTTP)
 
 Responsibility:

@@ -15,7 +15,7 @@ Dependency constraints:
 
 Stability:
 - Highly stable.
-- Part of the domain’s public error contract.
+- Part of the domain's public error contract.
 
 Usage:
 - Raised by domain entities, value objects, and domain services when invariants are broken.
